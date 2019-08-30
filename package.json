@@ -1,5 +1,5 @@
 {
-  "name": "react-draft-wysiwyg",
+  "name": "@dock365/react-draft-wysiwyg",
   "version": "1.13.2",
   "description": "A wysiwyg on top of DraftJS.",
   "main": "dist/react-draft-wysiwyg.js",
@@ -76,7 +76,10 @@
     "flow": "flow; test $? -eq 0 -o $? -eq 2",
     "check": "npm run lint && npm run flow",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "patch-release": "npm run build && npm version patch && npm publish --access=public && git push --follow-tags",
+    "minor-release": "npm run build && npm version minor && npm publish --access=public && git push --follow-tags",
+    "major-release": "npm run build && npm version major && npm publish --access=public && git push --follow-tags"
   },
   "license": "MIT"
 }
