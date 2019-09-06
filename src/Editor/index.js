@@ -432,22 +432,50 @@ export default class WysiwygEditor extends Component {
     return false;
   };
 
-  handlePastedText = (text, html) => {
-    const { editorState } = this.state;
+  // Original
+  // handlePastedText = (text, html) => {
+  //   const { editorState } = this.state;
 
-    if (this.props.handlePastedText) {
-      return this.props.handlePastedText(
-        text,
-        html,
-        editorState,
-        this.onChange
+  //   if (this.props.handlePastedText) {
+  //     return this.props.handlePastedText(
+  //       text,
+  //       html,
+  //       editorState,
+  //       this.onChange
+  //     );
+  //   }
+  //   if (!this.props.stripPastedStyles) {
+  //     return handlePastedText(text, html, editorState, this.onChange);
+  //   }
+  //   return false;
+  // };
+
+  handlePastedText = (text, html) => {
+    //If copied text contains something we don't like, we can show a message that explains this
+    if (text.indexOf('TARGET') != -1) {
+      // we'll add a message for the offending user to the editor state
+      const newContent = Modifier.insertText(
+        this.state.editorState.getCurrentContent(),
+        this.state.editorState.getSelection(),
+        'You should not copy TARGET'
+      );
+
+      // update our state with the new editor content
+      this.onChange(EditorState.push(this.state.editorState, newContent, 'insert-characters'));
+      return true;
+    }
+    //Editor can't deal with <figure> tags. We replace figure tags with divs. Then the content is pasted like a normal img.
+    if (html) {
+      html = html.replace(/(<\/?)figure((?:\s+.*?)?>)/g, '$1div$2');
+
+      const newContent = Modifier.insertText(
+        this.state.editorState.getCurrentContent(),
+        this.state.editorState.getSelection(),
+        html
       );
     }
-    if (!this.props.stripPastedStyles) {
-      return handlePastedText(text, html, editorState, this.onChange);
-    }
     return false;
-  };
+  }
 
   preventDefault: Function = (event: Object) => {
     if (event.target.tagName === "INPUT" || event.target.tagName === "LABEL" || event.target.tagName === "TEXTAREA") {
@@ -496,30 +524,30 @@ export default class WysiwygEditor extends Component {
         aria-label="rdw-wrapper"
       >
         {!toolbarHidden && (
-        <div
-          className={classNames("rdw-editor-toolbar", toolbarClassName)}
-          style={{
-            visibility: toolbarShow ? "visible" : "hidden",
-            ...toolbarStyle
-          }}
-          onMouseDown={this.preventDefault}
-          aria-label="rdw-toolbar"
-          aria-hidden={(!editorFocused && toolbarOnFocus).toString()}
-          onFocus={this.onToolbarFocus}
-        >
-          {toolbar.options.map((opt, index) => {
-            const Control = Controls[opt];
-            const config = toolbar[opt];
-            if (opt === 'image' && uploadCallback) {
-              config.uploadCallback = uploadCallback;
-            }
-            return <Control key={index} {...controlProps} config={config} />;
-          })}
-          {toolbarCustomButtons &&
-            toolbarCustomButtons.map((button, index) =>
-              React.cloneElement(button, { key: index, ...controlProps })
-            )}
-        </div>  
+          <div
+            className={classNames("rdw-editor-toolbar", toolbarClassName)}
+            style={{
+              visibility: toolbarShow ? "visible" : "hidden",
+              ...toolbarStyle
+            }}
+            onMouseDown={this.preventDefault}
+            aria-label="rdw-toolbar"
+            aria-hidden={(!editorFocused && toolbarOnFocus).toString()}
+            onFocus={this.onToolbarFocus}
+          >
+            {toolbar.options.map((opt, index) => {
+              const Control = Controls[opt];
+              const config = toolbar[opt];
+              if (opt === 'image' && uploadCallback) {
+                config.uploadCallback = uploadCallback;
+              }
+              return <Control key={index} {...controlProps} config={config} />;
+            })}
+            {toolbarCustomButtons &&
+              toolbarCustomButtons.map((button, index) =>
+                React.cloneElement(button, { key: index, ...controlProps })
+              )}
+          </div>
         )}
         <div
           ref={this.setWrapperReference}
