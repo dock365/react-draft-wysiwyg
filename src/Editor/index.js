@@ -408,15 +408,15 @@ export default class WysiwygEditor extends Component {
     });
   };
 
-  handleKeyCommand: Function = (command: Object): boolean => {
-    const { editorState, toolbar: { inline } } = this.state;
-    if (inline && inline.options.indexOf(command) >= 0) {
-      const newState = RichUtils.handleKeyCommand(editorState, command);
-      if (newState) {
-        this.onChange(newState);
-        return true;
-      }
+  handleKeyCommand: Function = (command: Object, editorState: EditorState): boolean => {
+    const { toolbar: { inline } } = this.state;
+    // if ((inline && inline.options.indexOf(command) >= 0) || command === "delete" || command === "backspace") {
+    const newState = RichUtils.handleKeyCommand(editorState, command);
+    if (newState) {
+      this.onChange(newState);
+      return true;
     }
+    // }
     return false;
   };
 
@@ -496,30 +496,30 @@ export default class WysiwygEditor extends Component {
         aria-label="rdw-wrapper"
       >
         {!toolbarHidden && (
-        <div
-          className={classNames("rdw-editor-toolbar", toolbarClassName)}
-          style={{
-            visibility: toolbarShow ? "visible" : "hidden",
-            ...toolbarStyle
-          }}
-          onMouseDown={this.preventDefault}
-          aria-label="rdw-toolbar"
-          aria-hidden={(!editorFocused && toolbarOnFocus).toString()}
-          onFocus={this.onToolbarFocus}
-        >
-          {toolbar.options.map((opt, index) => {
-            const Control = Controls[opt];
-            const config = toolbar[opt];
-            if (opt === 'image' && uploadCallback) {
-              config.uploadCallback = uploadCallback;
-            }
-            return <Control key={index} {...controlProps} config={config} />;
-          })}
-          {toolbarCustomButtons &&
-            toolbarCustomButtons.map((button, index) =>
-              React.cloneElement(button, { key: index, ...controlProps })
-            )}
-        </div>
+          <div
+            className={classNames("rdw-editor-toolbar", toolbarClassName)}
+            style={{
+              visibility: toolbarShow ? "visible" : "hidden",
+              ...toolbarStyle
+            }}
+            onMouseDown={this.preventDefault}
+            aria-label="rdw-toolbar"
+            aria-hidden={(!editorFocused && toolbarOnFocus).toString()}
+            onFocus={this.onToolbarFocus}
+          >
+            {toolbar.options.map((opt, index) => {
+              const Control = Controls[opt];
+              const config = toolbar[opt];
+              if (opt === 'image' && uploadCallback) {
+                config.uploadCallback = uploadCallback;
+              }
+              return <Control key={index} {...controlProps} config={config} />;
+            })}
+            {toolbarCustomButtons &&
+              toolbarCustomButtons.map((button, index) =>
+                React.cloneElement(button, { key: index, ...controlProps })
+              )}
+          </div>
         )}
         <div
           ref={this.setWrapperReference}
